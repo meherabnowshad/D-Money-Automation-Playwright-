@@ -1,0 +1,16 @@
+# Dependency directories
+node_modules/
+
+# Playwright reports and test artifacts
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+
+# Environment and OS files
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.local
