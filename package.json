@@ -1,0 +1,26 @@
+{
+  "name": "d-money-automation-playwright",
+  "version": "1.0.0",
+  "description": "End-to-end automation for DMoney portal using Playwright and Page Object Model",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:regression": "playwright test -g \"@regression\"",
+    "test:smoke": "playwright test -g \"@smoke\"",
+    "test:record": "playwright test -g \"@regression\" --headed"
+  },
+  "keywords": [
+    "playwright",
+    "automation",
+    "testing",
+    "pom",
+    "dmoney"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.4"
+  }
+}
