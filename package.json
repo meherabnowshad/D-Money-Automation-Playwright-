@@ -8,7 +8,9 @@
     "test:headed": "playwright test --headed",
     "test:regression": "playwright test -g \"@regression\"",
     "test:smoke": "playwright test -g \"@smoke\"",
-    "test:record": "playwright test -g \"@regression\" --headed"
+    "test:record": "playwright test -g \"@regression\" --headed",
+    "test:gmail": "playwright test tests/gmail.spec.ts",
+    "read:email": "node scripts/read_latest_email.js"
   },
   "keywords": [
     "playwright",
