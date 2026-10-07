@@ -20,9 +20,10 @@ export const CREDENTIALS = {
 
 export function generateRandomAgentData(): UserData {
   const uniqueId = `${Date.now().toString().slice(-6)}${Math.floor(10 + Math.random() * 90)}`;
+  const baseEmail = process.env.GMAIL_BASE_EMAIL || 'meherabhossainnowshad';
   return {
     name: `Agent Automation ${uniqueId}`,
-    email: `agent_${uniqueId}@gmail.com`,
+    email: `${baseEmail}+agent${uniqueId}@gmail.com`,
     password: 'Password1234',
     phone: `017${Math.floor(10000000 + Math.random() * 90000000)}`,
     nid: `${Math.floor(1000000000 + Math.random() * 9000000000)}`,

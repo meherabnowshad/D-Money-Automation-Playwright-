@@ -1,5 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// Automatically load environment variables from .env file
+if (process.loadEnvFile) {
+  try {
+    process.loadEnvFile('.env');
+  } catch {}
+}
+
 export default defineConfig({
   testDir: './tests',
   fullyParallel: false,

@@ -46,4 +46,3 @@ export class ResetPasswordPage extends BasePage {
     return (await this.successAlert.innerText()).trim();
   }
 }
-

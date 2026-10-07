@@ -7,6 +7,12 @@
  * - Read message: https://gmail.googleapis.com/gmail/v1/users/me/messages/{{messageId}}
  */
 
+if (process.loadEnvFile) {
+  try {
+    process.loadEnvFile('.env');
+  } catch {}
+}
+
 const token = process.env.GMAIL_ACCESS_TOKEN || process.argv[2] || '';
 const query = process.argv[3] || (!process.env.GMAIL_ACCESS_TOKEN ? '' : process.argv[2]) || '';
 

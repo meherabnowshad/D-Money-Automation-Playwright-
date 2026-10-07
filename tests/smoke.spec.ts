@@ -26,24 +26,6 @@ test.describe('DMoney Positive Journey - Smoke Test Suite', () => {
     const todaysDate = getTodaysDateFormatted();
     const csvFileName = `self_statement_${todaysDate}.csv`;
 
-    const getOtp = async (email: string): Promise<string> => {
-      if (process.env.GMAIL_ACCESS_TOKEN) {
-        try {
-          return await gmailHelper.waitForLatestOtp({ retries: 5, delayMs: 1500 });
-        } catch {}
-      }
-      return await apiHelper.getUserOtp(email);
-    };
-
-    const getResetToken = async (email: string): Promise<string> => {
-      if (process.env.GMAIL_ACCESS_TOKEN) {
-        try {
-          return await gmailHelper.waitForLatestResetToken({ retries: 5, delayMs: 1500 });
-        } catch {}
-      }
-      return await apiHelper.getUserResetToken(email);
-    };
-
     // 1. Positive: Register Agent
     await registerPage.navigate();
     await registerPage.registerUser(agentData);
@@ -75,9 +57,10 @@ test.describe('DMoney Positive Journey - Smoke Test Suite', () => {
     await cashInPage.logout();
 
     // 4. Positive: Agent Login & Deposit 500 Tk to Customer
+    const loginTime = Date.now() - 30000;
     await loginPage.fillCredentials(agentData.email, agentData.password);
     await expect(loginPage.otpHeading).toBeVisible();
-    const otp1 = await getOtp(agentData.email);
+    const otp1 = await gmailHelper.waitForLatestOtp({ recipientEmail: agentData.email, minTimestamp: loginTime });
     await loginPage.submitOtp(otp1);
     await expect(page).toHaveURL(/.*profile/);
     await loginPage.saveStorageSession();
@@ -92,18 +75,24 @@ test.describe('DMoney Positive Journey - Smoke Test Suite', () => {
     await loginPage.logout();
 
     // 5. Positive: Reset Password & Login with New Password
+    const resetTime = Date.now() - 30000;
     await resetPasswordPage.navigateForgotPassword();
     await resetPasswordPage.requestResetLink(agentData.email);
-    const resetToken = await getResetToken(agentData.email);
+    const resetToken = await gmailHelper.waitForLatestResetToken({ recipientEmail: agentData.email, minTimestamp: resetTime });
 
     await resetPasswordPage.navigateResetPassword(resetToken);
     await resetPasswordPage.resetPassword(newPassword);
     expect(await resetPasswordPage.getAlertText()).toContain('Your password has been reset successfully');
 
+    const postResetTime = Date.now() - 5000;
     await loginPage.navigate();
     await loginPage.fillCredentials(agentData.email, newPassword);
     await expect(loginPage.otpHeading).toBeVisible();
-    const otp2 = await getOtp(agentData.email);
+    const otp2 = await gmailHelper.waitForLatestOtp({
+      recipientEmail: agentData.email,
+      minTimestamp: postResetTime,
+      excludeOtp: otp1,
+    });
     await loginPage.submitOtp(otp2);
     await expect(page).toHaveURL(/.*profile/);
     await loginPage.saveStorageSession();

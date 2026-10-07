@@ -7,6 +7,7 @@ export interface GmailMessageSummary {
   date: string;
   body: string;
   snippet: string;
+  internalDate: number;
 }
 
 export class GmailHelper {
@@ -103,6 +104,7 @@ export class GmailHelper {
       date: getHeader('Date'),
       body: extractBody(data.payload),
       snippet: data.snippet || '',
+      internalDate: Number(data.internalDate) || 0,
     };
   }
 
@@ -120,52 +122,97 @@ export class GmailHelper {
   /**
    * Poll for the latest DMoney OTP code from incoming email
    */
-  async waitForLatestOtp(options?: { minInternalDate?: number; retries?: number; delayMs?: number }): Promise<string> {
-    const retries = options?.retries ?? 10;
+  async waitForLatestOtp(options?: {
+    recipientEmail?: string;
+    minTimestamp?: number;
+    excludeOtp?: string;
+    retries?: number;
+    delayMs?: number;
+  }): Promise<string> {
+    if (!this.accessToken) {
+      throw new Error('GMAIL_ACCESS_TOKEN is missing. Please set GMAIL_ACCESS_TOKEN in .env or environment variables.');
+    }
+
+    const retries = options?.retries ?? 25;
     const delayMs = options?.delayMs ?? 2000;
+    const query = 'from:salman@roadtocareer.net OTP';
 
     for (let i = 0; i < retries; i++) {
       try {
-        const messages = await this.listMessages('from:salman@roadtocareer.net OTP', 5);
-        if (messages.length > 0) {
-          const email = await this.readMessage(messages[0].id);
-          // Match 4-digit OTP
-          const otpMatch = email.body.match(/(\d{4})/);
+        const messages = await this.listMessages(query, 5);
+        for (const msg of messages) {
+          const email = await this.readMessage(msg.id);
+          // Check timestamp freshness if specified
+          if (options?.minTimestamp && email.internalDate < options.minTimestamp) {
+            continue;
+          }
+          // Check recipient matches if specified
+          if (options?.recipientEmail && !email.to.toLowerCase().includes(options.recipientEmail.toLowerCase())) {
+            continue;
+          }
+          // Ensure this is an OTP email
+          if (!email.subject.toLowerCase().includes('otp')) {
+            continue;
+          }
+          const otpMatch =
+            email.body.match(/(?:login is:|otp.*?is:)\s*(\d{4})/i) ||
+            email.body.match(/\n\s*(\b\d{4}\b)\s*\n/);
           if (otpMatch) {
-            return otpMatch[1];
+            const foundOtp = otpMatch[1];
+            if (options?.excludeOtp && foundOtp === options.excludeOtp) {
+              continue;
+            }
+            return foundOtp;
           }
         }
-      } catch (e) {
-        // Retry on transient network errors
+      } catch (e: any) {
+        if (e.message?.includes('401')) {
+          throw new Error('Gmail API Token Expired (401 Unauthorized). Please provide a fresh GMAIL_ACCESS_TOKEN.');
+        }
       }
       await new Promise(r => setTimeout(r, delayMs));
     }
-    throw new Error('Timed out waiting for DMoney OTP from Gmail');
+    throw new Error(`Timed out waiting for DMoney OTP from Gmail${options?.recipientEmail ? ` for ${options.recipientEmail}` : ''}`);
   }
 
   /**
    * Poll for the latest DMoney reset password link or token from incoming email
    */
-  async waitForLatestResetToken(options?: { retries?: number; delayMs?: number }): Promise<string> {
-    const retries = options?.retries ?? 10;
+  async waitForLatestResetToken(options?: { recipientEmail?: string; minTimestamp?: number; retries?: number; delayMs?: number }): Promise<string> {
+    if (!this.accessToken) {
+      throw new Error('GMAIL_ACCESS_TOKEN is missing. Please set GMAIL_ACCESS_TOKEN in .env or environment variables.');
+    }
+
+    const retries = options?.retries ?? 20;
     const delayMs = options?.delayMs ?? 2000;
+    const query = 'from:salman@roadtocareer.net "Password Reset"';
 
     for (let i = 0; i < retries; i++) {
       try {
-        const messages = await this.listMessages('from:salman@roadtocareer.net "Password Reset"', 5);
-        if (messages.length > 0) {
-          const email = await this.readMessage(messages[0].id);
+        const messages = await this.listMessages(query, 5);
+        for (const msg of messages) {
+          const email = await this.readMessage(msg.id);
+          // Check timestamp freshness if specified
+          if (options?.minTimestamp && email.internalDate < options.minTimestamp) {
+            continue;
+          }
+          // Check recipient matches if specified
+          if (options?.recipientEmail && !email.to.toLowerCase().includes(options.recipientEmail.toLowerCase())) {
+            continue;
+          }
           const tokenMatch = email.body.match(/token=([a-zA-Z0-9]+)/);
           if (tokenMatch) {
             return tokenMatch[1];
           }
         }
-      } catch (e) {
-        // Retry on transient network errors
+      } catch (e: any) {
+        if (e.message?.includes('401')) {
+          throw new Error('Gmail API Token Expired (401 Unauthorized). Please provide a fresh GMAIL_ACCESS_TOKEN.');
+        }
       }
       await new Promise(r => setTimeout(r, delayMs));
     }
-    throw new Error('Timed out waiting for DMoney Password Reset token from Gmail');
+    throw new Error(`Timed out waiting for DMoney Password Reset token from Gmail${options?.recipientEmail ? ` for ${options.recipientEmail}` : ''}`);
   }
 }
 

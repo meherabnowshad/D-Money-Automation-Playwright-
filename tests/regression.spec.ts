@@ -26,30 +26,6 @@ test.describe('DMoney E2E User Journey - Regression Test Suite', () => {
     const todaysDate = getTodaysDateFormatted();
     const csvFileName = `self_statement_${todaysDate}.csv`;
 
-    // Fetch OTP via Gmail API if token available, fallback to backend API
-    const getOtp = async (email: string): Promise<string> => {
-      if (process.env.GMAIL_ACCESS_TOKEN) {
-        try {
-          return await gmailHelper.waitForLatestOtp({ retries: 5, delayMs: 1500 });
-        } catch {
-          // Fallback to API if email polling times out
-        }
-      }
-      return await apiHelper.getUserOtp(email);
-    };
-
-    // Fetch Reset Token via Gmail API if token available, fallback to backend API
-    const getResetToken = async (email: string): Promise<string> => {
-      if (process.env.GMAIL_ACCESS_TOKEN) {
-        try {
-          return await gmailHelper.waitForLatestResetToken({ retries: 5, delayMs: 1500 });
-        } catch {
-          // Fallback to API if email polling times out
-        }
-      }
-      return await apiHelper.getUserResetToken(email);
-    };
-
     // 1. Open DMoney portal and navigate to Sign Up
     await registerPage.navigate();
 
@@ -123,10 +99,11 @@ test.describe('DMoney E2E User Journey - Regression Test Suite', () => {
     await expect(page).toHaveURL(/.*login/);
 
     // 19. Log in using the newly created Agent account
+    const loginTime = Date.now() - 30000;
     await loginPage.fillCredentials(agentData.email, agentData.password);
     await expect(loginPage.otpHeading).toBeVisible();
 
-    const agentOtp = await getOtp(agentData.email);
+    const agentOtp = await gmailHelper.waitForLatestOtp({ recipientEmail: agentData.email, minTimestamp: loginTime });
     await loginPage.submitOtp(agentOtp);
 
     // 20. Validation: Verify Agent can log in after activation
@@ -158,12 +135,13 @@ test.describe('DMoney E2E User Journey - Regression Test Suite', () => {
     await expect(page).toHaveURL(/.*login/);
 
     // 26. Reset Agent account password
+    const resetTime = Date.now() - 30000;
     await resetPasswordPage.navigateForgotPassword();
     await resetPasswordPage.requestResetLink(agentData.email);
     const resetAlert = await resetPasswordPage.getAlertText();
     expect(resetAlert).toMatch(/password reset link has been sent/i);
 
-    const resetToken = await getResetToken(agentData.email);
+    const resetToken = await gmailHelper.waitForLatestResetToken({ recipientEmail: agentData.email, minTimestamp: resetTime });
     expect(resetToken).toBeTruthy();
 
     await resetPasswordPage.navigateResetPassword(resetToken);
@@ -180,10 +158,15 @@ test.describe('DMoney E2E User Journey - Regression Test Suite', () => {
     expect(loginError.toLowerCase()).toMatch(/password incorrect|invalid credentials|failed/i);
 
     // 29. Validation: Verify login with newly reset password succeeds
+    const postResetTime = Date.now() - 5000;
     await loginPage.fillCredentials(agentData.email, newPassword);
     await expect(loginPage.otpHeading).toBeVisible();
 
-    const newOtp = await getOtp(agentData.email);
+    const newOtp = await gmailHelper.waitForLatestOtp({
+      recipientEmail: agentData.email,
+      minTimestamp: postResetTime,
+      excludeOtp: agentOtp,
+    });
     await loginPage.submitOtp(newOtp);
     await expect(page).toHaveURL(/.*profile/);
     await loginPage.saveStorageSession();
