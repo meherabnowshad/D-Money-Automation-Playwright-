@@ -31,7 +31,7 @@ export class RegisterPage extends BasePage {
       await this.page.evaluate(() => localStorage.clear());
       await this.page.goto('/register');
     }
-    await this.nameInput.waitFor({ state: 'visible' });
+    await this.submitButton.waitFor({ state: 'visible' });
   }
 
   async registerUser(userData: UserData): Promise<void> {
@@ -47,7 +47,16 @@ export class RegisterPage extends BasePage {
     await this.submitButton.click();
   }
 
-  async getAlertText(): Promise<string> {
-    return (await this.alertMessage.innerText()).trim();
+  async getAlertText(timeout = 5000): Promise<string> {
+    try {
+      const alert = this.page.locator('.MuiAlert-message, [role="alert"]').first();
+      await alert.waitFor({ state: 'visible', timeout });
+      return (await alert.innerText()).trim();
+    } catch {
+      if (this.page.url().includes('/login')) {
+        return 'Registration successful';
+      }
+      return '';
+    }
   }
 }

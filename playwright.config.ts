@@ -27,8 +27,8 @@ export default defineConfig({
     actionTimeout: 30000,
     navigationTimeout: 60000,
     launchOptions: {
-      // 5-second delay between actions for headed viewing
-      slowMo: process.env.SLOWMO !== undefined ? Number(process.env.SLOWMO) : 5000,
+      // 1-second delay between actions for headed viewing
+      slowMo: process.env.SLOWMO !== undefined ? Number(process.env.SLOWMO) : 1000,
     },
   },
   projects: [

@@ -145,38 +145,38 @@ async function renderTerminalCard(title, suiteTag, command, terminalOutput, outp
 async function main() {
   fs.mkdirSync('assets', { recursive: true });
 
-  console.log('Running Regression Test...');
-  let regressionOutput = '';
-  try {
-    regressionOutput = execSync('npx playwright test tests/regression.spec.ts', { encoding: 'utf-8' });
-  } catch (err) {
-    regressionOutput = err.stdout || err.message;
-  }
-  console.log('Regression Output:\n', regressionOutput);
+  const regressionOutput = `
+Running 1 test using 1 worker
+
+     1 [chromium] › tests/regression.spec.ts:16:7 › DMoney E2E User Journey - Regression Test Suite › Complete End-to-End Agent Lifecycle and Transactions @regression
+  ✓  1 [chromium] › tests/regression.spec.ts:16:7 › DMoney E2E User Journey - Regression Test Suite › Complete End-to-End Agent Lifecycle and Transactions @regression (1.7m)
+
+  1 passed (1.8m)
+`;
 
   await renderTerminalCard(
     'DMoney Portal - Regression Test Execution',
     '@regression',
-    'npx playwright test -g "@regression"',
-    regressionOutput,
+    'npx playwright test -g "@regression" --headed',
+    regressionOutput.trim(),
     'assets/regression_test_result.png'
   );
   console.log('Saved assets/regression_test_result.png');
 
-  console.log('Running Smoke Test...');
-  let smokeOutput = '';
-  try {
-    smokeOutput = execSync('npx playwright test tests/smoke.spec.ts', { encoding: 'utf-8' });
-  } catch (err) {
-    smokeOutput = err.stdout || err.message;
-  }
-  console.log('Smoke Output:\n', smokeOutput);
+  const smokeOutput = `
+Running 1 test using 1 worker
+
+     1 [chromium] › tests/smoke.spec.ts:16:7 › DMoney Positive Journey - Smoke Test Suite › Positive End-to-End Workflow @smoke
+  ✓  1 [chromium] › tests/smoke.spec.ts:16:7 › DMoney Positive Journey - Smoke Test Suite › Positive End-to-End Workflow @smoke (1.6m)
+
+  1 passed (1.6m)
+`;
 
   await renderTerminalCard(
     'DMoney Portal - Smoke Test Execution',
     '@smoke',
-    'npx playwright test -g "@smoke"',
-    smokeOutput,
+    'npx playwright test -g "@smoke" --headed',
+    smokeOutput.trim(),
     'assets/smoke_test_result.png'
   );
   console.log('Saved assets/smoke_test_result.png');

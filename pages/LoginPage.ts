@@ -56,7 +56,13 @@ export class LoginPage extends BasePage {
     await this.page.context().storageState({ path: storagePath });
   }
 
-  async getAlertText(): Promise<string> {
-    return (await this.alertMessage.innerText()).trim();
+  async getAlertText(timeout = 5000): Promise<string> {
+    try {
+      const alert = this.page.locator('.MuiAlert-message, [role="alert"]').first();
+      await alert.waitFor({ state: 'visible', timeout });
+      return (await alert.innerText()).trim();
+    } catch {
+      return '';
+    }
   }
 }

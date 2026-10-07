@@ -22,6 +22,50 @@ export class GmailHelper {
     this.accessToken = token;
   }
 
+  async refreshAccessToken(): Promise<string> {
+    const refreshToken = process.env.GMAIL_REFRESH_TOKEN;
+    if (!refreshToken) {
+      throw new Error('GMAIL_REFRESH_TOKEN is not defined in environment');
+    }
+    const res = await fetch('https://developers.google.com/oauthplayground/refreshAccessToken', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token_uri: 'https://oauth2.googleapis.com/token',
+        refresh_token: refreshToken,
+      }),
+    });
+    const data = await res.json();
+    if (data.access_token) {
+      this.accessToken = data.access_token;
+      return data.access_token;
+    }
+    throw new Error('Failed to refresh access token');
+  }
+
+  private async fetchWithAuth(url: string, options: RequestInit = {}): Promise<Response> {
+    let response = await fetch(url, {
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+        Authorization: `Bearer ${this.accessToken}`,
+      },
+    });
+
+    if (response.status === 401 && process.env.GMAIL_REFRESH_TOKEN) {
+      await this.refreshAccessToken();
+      response = await fetch(url, {
+        ...options,
+        headers: {
+          ...(options.headers || {}),
+          Authorization: `Bearer ${this.accessToken}`,
+        },
+      });
+    }
+
+    return response;
+  }
+
   /**
    * List message IDs matching a query
    * Endpoint: https://gmail.googleapis.com/gmail/v1/users/me/messages
@@ -33,11 +77,7 @@ export class GmailHelper {
     }
     url.searchParams.set('maxResults', String(maxResults));
 
-    const response = await fetch(url.toString(), {
-      headers: {
-        Authorization: `Bearer ${this.accessToken}`,
-      },
-    });
+    const response = await this.fetchWithAuth(url.toString());
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -53,11 +93,7 @@ export class GmailHelper {
    * Endpoint: https://gmail.googleapis.com/gmail/v1/users/me/messages/{{messageId}}
    */
   async readMessage(messageId: string): Promise<GmailMessageSummary> {
-    const response = await fetch(`${this.baseUrl}/messages/${messageId}`, {
-      headers: {
-        Authorization: `Bearer ${this.accessToken}`,
-      },
-    });
+    const response = await this.fetchWithAuth(`${this.baseUrl}/messages/${messageId}`);
 
     if (!response.ok) {
       const errorText = await response.text();

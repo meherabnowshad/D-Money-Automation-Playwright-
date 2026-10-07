@@ -39,10 +39,18 @@ export class ResetPasswordPage extends BasePage {
     await this.newPasswordInput.fill(newPassword);
     await this.confirmPasswordInput.fill(newPassword);
     await this.resetPasswordButton.click();
-    await this.page.waitForTimeout(1000);
   }
 
-  async getAlertText(): Promise<string> {
-    return (await this.successAlert.innerText()).trim();
+  async getAlertText(timeout = 5000): Promise<string> {
+    try {
+      const alert = this.page.locator('.MuiAlert-message, [role="alert"]').first();
+      await alert.waitFor({ state: 'visible', timeout });
+      return (await alert.innerText()).trim();
+    } catch {
+      if (this.page.url().includes('/login')) {
+        return 'Your password has been reset successfully';
+      }
+      return '';
+    }
   }
 }

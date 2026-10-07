@@ -10,6 +10,9 @@ import { CsvHelper } from '../utils/csvHelper';
 import { generateRandomAgentData, CREDENTIALS, getTodaysDateFormatted } from '../utils/testData';
 
 test.describe('DMoney Positive Journey - Smoke Test Suite', () => {
+  // Start from a clean, logged-out state
+  test.use({ storageState: { cookies: [], origins: [] } });
+
   test('Positive End-to-End Workflow @smoke', async ({ page }) => {
     const gmailHelper = new GmailHelper();
     const registerPage = new RegisterPage(page);

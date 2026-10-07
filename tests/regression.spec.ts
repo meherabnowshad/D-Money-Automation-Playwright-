@@ -10,6 +10,9 @@ import { CsvHelper } from '../utils/csvHelper';
 import { generateRandomAgentData, CREDENTIALS, getTodaysDateFormatted } from '../utils/testData';
 
 test.describe('DMoney E2E User Journey - Regression Test Suite', () => {
+  // Start from a clean, logged-out state
+  test.use({ storageState: { cookies: [], origins: [] } });
+
   test('Complete End-to-End Agent Lifecycle and Transactions @regression', async ({ page }) => {
     const gmailHelper = new GmailHelper();
     const registerPage = new RegisterPage(page);

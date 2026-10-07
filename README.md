@@ -37,8 +37,10 @@ The repository follows a clean, modular Page Object Model architecture:
 │   ├── regression_test_result.png
 │   └── smoke_test_result.png
 ├── recordings/                    # Headed automation video recordings
-│   └── dmoney_e2e_automation.webm
-└── self_statement_2026-10-07.csv  # Extracted statement CSV file
+│   ├── dmoney_e2e_automation.webm # Full regression suite recording
+│   ├── dmoney_regression_automation.webm
+│   └── dmoney_smoke_automation.webm # Smoke suite recording
+└── self_statement_2026-10-08.csv  # Extracted statement CSV file
 ```
 
 ---
@@ -155,13 +157,14 @@ npx playwright show-report
 
 ---
 
-## 🎥 Full Automation Video Recording
+## 🎥 Full Automation Video Recordings
 
-The complete end-to-end user journey has been recorded in headed mode.
+Both test suites have been recorded in headed mode with a 1-second pacing delay:
 
-- **Video File:** [recordings/dmoney_e2e_automation.webm](recordings/dmoney_e2e_automation.webm)
+- **Full Regression Suite Recording (`@regression`):** [recordings/dmoney_e2e_automation.webm](recordings/dmoney_e2e_automation.webm)
+- **Smoke Test Suite Recording (`@smoke`):** [recordings/dmoney_smoke_automation.webm](recordings/dmoney_smoke_automation.webm)
 
-> To view the recording, open the `.webm` file directly in any modern browser or media player (e.g., Chrome, Firefox, or VLC).
+> To view the recordings, open the `.webm` files directly in any modern browser or media player (e.g., Chrome, Firefox, or VLC).
 
 ---
 
@@ -185,12 +188,12 @@ Execution output of the positive smoke suite (`@smoke`):
 
 The extracted transaction history is saved dynamically at the project root following the required naming convention: `self_statement_todays_date.csv`.
 
-**Example:** `self_statement_2026-10-07.csv`
+**Latest Output:** `self_statement_2026-10-08.csv`
 
 ```csv
 Transaction ID,Sender Account,Receiver Account,Type,Debit,Credit,Balance,Date
-TXNWJB2NKXY57,SYSTEM,01722493822,Top-up from SYSTEM,-,2000.00,2000.00,"07/10/2026, 01:35:28"
-TXNVAHSGLYZVP,01722493822,01655233072,Deposit Commission,500.00,12.50,1512.50,"07/10/2026, 01:35:33"
+TXNQBY08WSU7L,SYSTEM,01722848894,Top-up from SYSTEM,-,2000.00,2000.00,"08/10/2026, 02:19:55"
+TXN7NSLAY46J0,01722848894,01726702638,Deposit Commission,500.00,12.50,1512.50,"08/10/2026, 02:20:15"
 ```
 
 ---

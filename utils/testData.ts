@@ -17,7 +17,7 @@ export const CREDENTIALS = {
     password: '1234',
   },
   customer: {
-    phone: '01655233072',
+    phone: '01726702638',
   },
 };
 
