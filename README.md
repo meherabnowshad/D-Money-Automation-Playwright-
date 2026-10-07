@@ -83,34 +83,35 @@ The repository follows a clean, modular Page Object Model architecture:
 
 ## ✅ Test Coverage Checklist
 
-| # | Validation Requirement | Status |
-|---|---|:---:|
-| 1 | Verify Agent registration is successful | Passed |
-| 2 | Verify newly created Agent is initially inactive (`PENDING`) | Passed |
-| 3 | Verify Admin login is successful | Passed |
-| 4 | Verify newly created Agent appears in Admin user list | Passed |
-| 5 | Verify Admin can activate the Agent | Passed |
-| 6 | Verify the Agent remains active after page reload | Passed |
-| 7 | Verify System login is successful | Passed |
-| 8 | Verify System can deposit 2000 Tk to the Agent | Passed |
-| 9 | Verify System deposit creates the correct transaction record | Passed |
-| 10 | Verify Agent can log in after activation | Passed |
-| 11 | Verify Agent balance is exactly 2000 Tk | Passed |
-| 12 | Verify Agent can deposit 500 Tk to an existing Customer | Passed |
-| 13 | Verify Agent balance is updated correctly after transaction | Passed |
-| 14 | Verify Customer deposit appears in Agent's Self Statement | Passed |
-| 15 | Verify Agent logout works successfully | Passed |
-| 16 | Verify Agent password reset works successfully | Passed |
-| 17 | Verify login with old password fails after password reset | Passed |
-| 18 | Verify login with new password succeeds | Passed |
-| 19 | Verify Self Statement contains expected transaction data | Passed |
-| 20 | Verify Self Statement data is saved into required CSV file | Passed |
+| #  | Validation Requirement                                         | Status |
+| -- | -------------------------------------------------------------- | :----: |
+| 1  | Verify Agent registration is successful                        | Passed |
+| 2  | Verify newly created Agent is initially inactive (`PENDING`) | Passed |
+| 3  | Verify Admin login is successful                               | Passed |
+| 4  | Verify newly created Agent appears in Admin user list          | Passed |
+| 5  | Verify Admin can activate the Agent                            | Passed |
+| 6  | Verify the Agent remains active after page reload              | Passed |
+| 7  | Verify System login is successful                              | Passed |
+| 8  | Verify System can deposit 2000 Tk to the Agent                 | Passed |
+| 9  | Verify System deposit creates the correct transaction record   | Passed |
+| 10 | Verify Agent can log in after activation                       | Passed |
+| 11 | Verify Agent balance is exactly 2000 Tk                        | Passed |
+| 12 | Verify Agent can deposit 500 Tk to an existing Customer        | Passed |
+| 13 | Verify Agent balance is updated correctly after transaction    | Passed |
+| 14 | Verify Customer deposit appears in Agent's Self Statement      | Passed |
+| 15 | Verify Agent logout works successfully                         | Passed |
+| 16 | Verify Agent password reset works successfully                 | Passed |
+| 17 | Verify login with old password fails after password reset      | Passed |
+| 18 | Verify login with new password succeeds                        | Passed |
+| 19 | Verify Self Statement contains expected transaction data       | Passed |
+| 20 | Verify Self Statement data is saved into required CSV file     | Passed |
 
 ---
 
 ## 🔐 Session Storage (`auth.json`)
 
 Session state storage is integrated as required:
+
 - Storage state is configured in `playwright.config.ts`:
   ```ts
   use: {
@@ -124,33 +125,41 @@ Session state storage is integrated as required:
 ## 🚀 How to Run the Tests
 
 ### 1. Prerequisites
+
 - Node.js (v18 or higher)
 - npm
 
 ### 2. Install Dependencies
+
 ```bash
 npm install
 npx playwright install chromium
 ```
 
 ### 3. Run Regression Test Suite
+
 Runs the full end-to-end regression suite covering all 20 validations:
+
 ```bash
 npm run test:regression
 ```
 
 ### 4. Run Smoke Test Suite
+
 Runs the smoke test suite covering the positive happy path:
+
 ```bash
 npm run test:smoke
 ```
 
 ### 5. Run in Headed Mode with Video Recording
+
 ```bash
 npm run test:record
 ```
 
 ### 6. View Playwright HTML Report
+
 ```bash
 npx playwright show-report
 ```
@@ -172,7 +181,7 @@ Both test suites have been recorded in headed mode with a 1-second pacing delay:
 
 Execution output of the full regression suite (`@regression`):
 
-![Regression Test Result](assets/regression_test_result.png)
+![1791405556960](image/README/1791405556960.png)
 
 ---
 
@@ -180,7 +189,7 @@ Execution output of the full regression suite (`@regression`):
 
 Execution output of the positive smoke suite (`@smoke`):
 
-![SmokeTest Result](assets/smoke_test_result.png)
+![1791405397715](image/README/1791405397715.png)
 
 ---
 
@@ -203,6 +212,7 @@ TXN7NSLAY46J0,01722848894,01726702638,Deposit Commission,500.00,12.50,1512.50,"0
 Integrated with the official **Google Gmail REST API** to list incoming messages, read email contents, and parse authentication OTP codes and password reset tokens in real time.
 
 ### Endpoints Used
+
 - **List Messages:**
   ```http
   GET https://gmail.googleapis.com/gmail/v1/users/me/messages
@@ -215,20 +225,22 @@ Integrated with the official **Google Gmail REST API** to list incoming messages
 ### Usage
 
 1. **Read Latest Email (CLI):**
+
    ```bash
    npm run read:email
    ```
    Or query by subject/sender:
+
    ```bash
    node scripts/read_latest_email.js "Password Reset"
    ```
-
 2. **Run Gmail Playwright Test:**
+
    ```bash
    npm run test:gmail
    ```
-
 3. **In Test Code (`utils/gmailHelper.ts`):**
+
    ```ts
    import { GmailHelper } from '../utils/gmailHelper';
 
@@ -243,5 +255,3 @@ Integrated with the official **Google Gmail REST API** to list incoming messages
    // Extract OTP
    const otp = await gmail.waitForLatestOtp();
    ```
-
-
