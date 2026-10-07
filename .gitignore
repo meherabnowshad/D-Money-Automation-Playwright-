@@ -14,3 +14,4 @@ Thumbs.db
 *.log
 .env
 .env.local
+auth.json

@@ -1,12 +1,19 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// Automatically load environment variables from .env file
+if (process.loadEnvFile) {
+  try {
+    process.loadEnvFile('.env');
+  } catch {}
+}
+
 export default defineConfig({
   testDir: './tests',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: 0,
   workers: 1,
-  timeout: 90000,
+  timeout: 360000,
   reporter: [
     ['list'],
     ['html', { open: 'never' }]
@@ -17,8 +24,12 @@ export default defineConfig({
     storageState: 'auth.json',
     video: 'on',
     screenshot: 'only-on-failure',
-    actionTimeout: 15000,
-    navigationTimeout: 30000,
+    actionTimeout: 30000,
+    navigationTimeout: 60000,
+    launchOptions: {
+      // 5-second delay between actions for headed viewing
+      slowMo: process.env.SLOWMO !== undefined ? Number(process.env.SLOWMO) : 5000,
+    },
   },
   projects: [
     {
