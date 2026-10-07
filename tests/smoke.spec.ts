@@ -6,12 +6,14 @@ import { CashInPage } from '../pages/CashInPage';
 import { ResetPasswordPage } from '../pages/ResetPasswordPage';
 import { SelfStatementPage } from '../pages/SelfStatementPage';
 import { ApiHelper } from '../utils/apiHelper';
+import { GmailHelper } from '../utils/gmailHelper';
 import { CsvHelper } from '../utils/csvHelper';
 import { generateRandomAgentData, CREDENTIALS, getTodaysDateFormatted } from '../utils/testData';
 
 test.describe('DMoney Positive Journey - Smoke Test Suite', () => {
   test('Positive End-to-End Workflow @smoke', async ({ page, request }) => {
     const apiHelper = new ApiHelper(request);
+    const gmailHelper = new GmailHelper();
     const registerPage = new RegisterPage(page);
     const loginPage = new LoginPage(page);
     const adminUsersPage = new AdminUsersPage(page);
@@ -23,6 +25,24 @@ test.describe('DMoney Positive Journey - Smoke Test Suite', () => {
     const newPassword = 'SmokePassword123';
     const todaysDate = getTodaysDateFormatted();
     const csvFileName = `self_statement_${todaysDate}.csv`;
+
+    const getOtp = async (email: string): Promise<string> => {
+      if (process.env.GMAIL_ACCESS_TOKEN) {
+        try {
+          return await gmailHelper.waitForLatestOtp({ retries: 5, delayMs: 1500 });
+        } catch {}
+      }
+      return await apiHelper.getUserOtp(email);
+    };
+
+    const getResetToken = async (email: string): Promise<string> => {
+      if (process.env.GMAIL_ACCESS_TOKEN) {
+        try {
+          return await gmailHelper.waitForLatestResetToken({ retries: 5, delayMs: 1500 });
+        } catch {}
+      }
+      return await apiHelper.getUserResetToken(email);
+    };
 
     // 1. Positive: Register Agent
     await registerPage.navigate();
@@ -57,7 +77,7 @@ test.describe('DMoney Positive Journey - Smoke Test Suite', () => {
     // 4. Positive: Agent Login & Deposit 500 Tk to Customer
     await loginPage.fillCredentials(agentData.email, agentData.password);
     await expect(loginPage.otpHeading).toBeVisible();
-    const otp1 = await apiHelper.getUserOtp(agentData.email);
+    const otp1 = await getOtp(agentData.email);
     await loginPage.submitOtp(otp1);
     await expect(page).toHaveURL(/.*profile/);
     await loginPage.saveStorageSession();
@@ -74,7 +94,7 @@ test.describe('DMoney Positive Journey - Smoke Test Suite', () => {
     // 5. Positive: Reset Password & Login with New Password
     await resetPasswordPage.navigateForgotPassword();
     await resetPasswordPage.requestResetLink(agentData.email);
-    const resetToken = await apiHelper.getUserResetToken(agentData.email);
+    const resetToken = await getResetToken(agentData.email);
 
     await resetPasswordPage.navigateResetPassword(resetToken);
     await resetPasswordPage.resetPassword(newPassword);
@@ -83,7 +103,7 @@ test.describe('DMoney Positive Journey - Smoke Test Suite', () => {
     await loginPage.navigate();
     await loginPage.fillCredentials(agentData.email, newPassword);
     await expect(loginPage.otpHeading).toBeVisible();
-    const otp2 = await apiHelper.getUserOtp(agentData.email);
+    const otp2 = await getOtp(agentData.email);
     await loginPage.submitOtp(otp2);
     await expect(page).toHaveURL(/.*profile/);
     await loginPage.saveStorageSession();

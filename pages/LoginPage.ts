@@ -23,13 +23,12 @@ export class LoginPage extends BasePage {
 
   async navigate(): Promise<void> {
     await this.page.goto('/login');
-    await this.page.waitForLoadState('networkidle');
     if (!this.page.url().includes('/login')) {
       await this.page.context().clearCookies();
       await this.page.evaluate(() => localStorage.clear());
       await this.page.goto('/login');
-      await this.page.waitForLoadState('networkidle');
     }
+    await this.identifierInput.waitFor({ state: 'visible' });
   }
 
   async fillCredentials(identifier: string, password: string): Promise<void> {

@@ -26,13 +26,12 @@ export class RegisterPage extends BasePage {
 
   async navigate(): Promise<void> {
     await this.page.goto('/register');
-    await this.page.waitForLoadState('networkidle');
     if (!this.page.url().includes('/register')) {
       await this.page.context().clearCookies();
       await this.page.evaluate(() => localStorage.clear());
       await this.page.goto('/register');
-      await this.page.waitForLoadState('networkidle');
     }
+    await this.nameInput.waitFor({ state: 'visible' });
   }
 
   async registerUser(userData: UserData): Promise<void> {
