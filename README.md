@@ -28,7 +28,7 @@ The repository follows a clean, modular Page Object Model architecture:
 │   └── SelfStatementPage.ts       # Transaction history filters, table extraction & CSV export
 ├── utils/                         # Helper utilities
 │   ├── testData.ts                # Dynamic agent data generator & credentials
-│   ├── apiHelper.ts               # Backend API helper for OTP, reset tokens & customer selection
+│   ├── gmailHelper.ts             # Gmail REST API helper for OTP & password reset link retrieval
 │   └── csvHelper.ts               # CSV formatter, exporter, and validator
 ├── tests/                         # Test suites
 │   ├── regression.spec.ts         # Full end-to-end regression suite (@regression)

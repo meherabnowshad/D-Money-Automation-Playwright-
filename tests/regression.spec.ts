@@ -5,14 +5,12 @@ import { AdminUsersPage } from '../pages/AdminUsersPage';
 import { CashInPage } from '../pages/CashInPage';
 import { ResetPasswordPage } from '../pages/ResetPasswordPage';
 import { SelfStatementPage } from '../pages/SelfStatementPage';
-import { ApiHelper } from '../utils/apiHelper';
 import { GmailHelper } from '../utils/gmailHelper';
 import { CsvHelper } from '../utils/csvHelper';
 import { generateRandomAgentData, CREDENTIALS, getTodaysDateFormatted } from '../utils/testData';
 
 test.describe('DMoney E2E User Journey - Regression Test Suite', () => {
-  test('Complete End-to-End Agent Lifecycle and Transactions @regression', async ({ page, request }) => {
-    const apiHelper = new ApiHelper(request);
+  test('Complete End-to-End Agent Lifecycle and Transactions @regression', async ({ page }) => {
     const gmailHelper = new GmailHelper();
     const registerPage = new RegisterPage(page);
     const loginPage = new LoginPage(page);
@@ -115,7 +113,7 @@ test.describe('DMoney E2E User Journey - Regression Test Suite', () => {
     expect(initialAgentBalance).toBe('2000.00');
 
     // 22. Get an existing customer and deposit 500 Tk
-    const customerPhone = await apiHelper.getEligibleCustomerPhone();
+    const customerPhone = CREDENTIALS.customer.phone;
     await cashInPage.navigate();
     await cashInPage.performCashIn(customerPhone, 500);
 

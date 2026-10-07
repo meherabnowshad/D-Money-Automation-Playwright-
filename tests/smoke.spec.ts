@@ -5,14 +5,12 @@ import { AdminUsersPage } from '../pages/AdminUsersPage';
 import { CashInPage } from '../pages/CashInPage';
 import { ResetPasswordPage } from '../pages/ResetPasswordPage';
 import { SelfStatementPage } from '../pages/SelfStatementPage';
-import { ApiHelper } from '../utils/apiHelper';
 import { GmailHelper } from '../utils/gmailHelper';
 import { CsvHelper } from '../utils/csvHelper';
 import { generateRandomAgentData, CREDENTIALS, getTodaysDateFormatted } from '../utils/testData';
 
 test.describe('DMoney Positive Journey - Smoke Test Suite', () => {
-  test('Positive End-to-End Workflow @smoke', async ({ page, request }) => {
-    const apiHelper = new ApiHelper(request);
+  test('Positive End-to-End Workflow @smoke', async ({ page }) => {
     const gmailHelper = new GmailHelper();
     const registerPage = new RegisterPage(page);
     const loginPage = new LoginPage(page);
@@ -67,7 +65,7 @@ test.describe('DMoney Positive Journey - Smoke Test Suite', () => {
 
     expect(await loginPage.getCurrentBalance()).toBe('2000.00');
 
-    const customerPhone = await apiHelper.getEligibleCustomerPhone();
+    const customerPhone = CREDENTIALS.customer.phone;
     await cashInPage.navigate();
     await cashInPage.performCashIn(customerPhone, 500);
     await expect(page.getByText(/Deposit successful|Cash in successful/i)).toBeVisible();

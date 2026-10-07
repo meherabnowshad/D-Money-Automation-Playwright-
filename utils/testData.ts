@@ -16,6 +16,9 @@ export const CREDENTIALS = {
     email: 'system@dmoney.com',
     password: '1234',
   },
+  customer: {
+    phone: '01655233072',
+  },
 };
 
 export function generateRandomAgentData(): UserData {
