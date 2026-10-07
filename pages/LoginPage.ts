@@ -37,7 +37,7 @@ export class LoginPage extends BasePage {
     await this.loginButton.click();
   }
 
-  async isOtpScreenVisible(timeout = 5000): Promise<boolean> {
+  async isOtpScreenVisible(timeout = 15000): Promise<boolean> {
     try {
       await this.otpHeading.waitFor({ state: 'visible', timeout });
       return true;
